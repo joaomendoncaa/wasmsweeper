@@ -7,6 +7,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sweeper</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100%;
+            height: 100%;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            background: red;
+        }
+
         .blocks-wrapper {
             width: min-content;
 
@@ -18,10 +35,13 @@
             cursor: pointer;
 
             padding: 1rem;
+
+            width: 5rem;
+            height: 5rem;
         }
 
         .block:hover {
-            background-color: grey;
+            background-color: lightgray;
             color: white;
         }
     </style>
@@ -33,8 +53,9 @@
     <script type="module">
         import init, { getBoardState, openField } from "./pkg/wasmsweeper.js"
 
-        const renderBoard = (boardState) => {
-            const boardData = boardState.split("\n").map(row => row.trim().split(/\s+/));
+        const renderBoard = () => {
+            const boardState = getBoardState();
+            const boardData = boardState.trim().split("\n").map(row => row.trim().split(/\s+/));
 
             let root = document.querySelector("#root");
             root.innerHTML = "";
@@ -55,7 +76,7 @@
 
                         openField(x, y);
 
-                        renderBoard(getBoardState());
+                        renderBoard();
                     });
 
                     blocksWrapper.appendChild(block);
@@ -64,11 +85,9 @@
         }
 
         (async function main() {
-            console.log("Hello, Sweeper!");
-
             await init();
 
-            renderBoard(getBoardState());
+            renderBoard();
         })();
     </script>
 </body>

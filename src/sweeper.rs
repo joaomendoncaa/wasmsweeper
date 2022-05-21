@@ -19,6 +19,7 @@ pub struct Sweeper {
     fields_open: HashSet<Position>,
     fields_flagged: HashSet<Position>,
     mines: HashSet<Position>,
+    is_game_over: bool,
 }
 
 impl Display for Sweeper {
@@ -72,6 +73,7 @@ impl Sweeper {
 
                 mines
             },
+            is_game_over: false,
         };
     }
 
@@ -92,7 +94,10 @@ impl Sweeper {
     }
 
     pub fn open(&mut self, position: Position) -> Option<MineOpeningResult> {
-        if self.fields_flagged.contains(&position) {
+        if self.is_game_over
+            || self.fields_open.contains(&position)
+            || self.fields_flagged.contains(&position)
+        {
             return None;
         }
 
@@ -101,14 +106,23 @@ impl Sweeper {
         let is_mine: bool = self.mines.contains(&position);
 
         if is_mine {
+            self.is_game_over = true;
             return Some(MineOpeningResult::Mine);
         }
 
-        return Some(MineOpeningResult::NoMine(0));
+        let mine_count = self.get_neightbors_mines(position);
+
+        if mine_count == 0 {
+            for neightbor in self.get_neighbors_fields_iter(position) {
+                self.open(neightbor);
+            }
+        }
+
+        return Some(MineOpeningResult::NoMine(mine_count));
     }
 
     pub fn toggle_flag(&mut self, position: Position) {
-        if self.fields_open.contains(&position) {
+        if self.is_game_over || self.fields_open.contains(&position) {
             return;
         }
 
