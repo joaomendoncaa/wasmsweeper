@@ -30,11 +30,13 @@ impl Display for Sweeper {
                 let position = (x, y);
 
                 if !self.fields_open.contains(&position) {
-                    f.write_str("⬛ ")?;
+                    if self.fields_flagged.contains(&position) {
+                        f.write_str("🚩 ")?;
+                    } else {
+                        f.write_str("⬛ ")?;
+                    }
                 } else if self.mines.contains(&position) {
                     f.write_str("💣 ")?;
-                } else if self.fields_flagged.contains(&position) {
-                    f.write_str("🚩 ")?;
                 } else {
                     write!(f, " {} ", self.get_neightbors_mines(position))?;
                 }
@@ -123,6 +125,10 @@ mod tests {
         sweeper.open((random_range(0, 10, true), random_range(0, 10, true)));
         sweeper.open((random_range(0, 10, true), random_range(0, 10, true)));
 
+        sweeper.toggle_flag((random_range(0, 10, true), random_range(0, 10, true)));
+        sweeper.toggle_flag((random_range(0, 10, true), random_range(0, 10, true)));
+        sweeper.toggle_flag((random_range(0, 10, true), random_range(0, 10, true)));
+        sweeper.toggle_flag((random_range(0, 10, true), random_range(0, 10, true)));
         sweeper.toggle_flag((random_range(0, 10, true), random_range(0, 10, true)));
 
         println!("{}", sweeper);
