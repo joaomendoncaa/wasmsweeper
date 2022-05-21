@@ -32,17 +32,17 @@ impl Display for Sweeper {
                 let is_mine = self.mines.contains(&position);
 
                 if is_field_closed && is_field_flagged {
-                    f.write_str("🚩 ")?;
+                    f.write_str("flag ")?;
                     continue;
                 }
 
                 if is_field_closed {
-                    f.write_str("⬛ ")?;
+                    f.write_str("close ")?;
                     continue;
                 }
 
                 if is_mine {
-                    f.write_str("💣 ")?;
+                    f.write_str("mine ")?;
                     continue;
                 }
 

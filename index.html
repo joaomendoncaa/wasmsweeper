@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sweeper</title>
+    <style>
+        .blocks-wrapper {
+            width: min-content;
+
+            display: grid;
+        }
+
+        .block {
+            border: none;
+            cursor: pointer;
+
+            padding: 1rem;
+        }
+
+        .block:hover {
+            background-color: grey;
+            color: white;
+        }
+
+        .block:active {
+            background-color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="module">
+        import init, { getBoardState } from "./pkg/wasmsweeper.js"
+
+        const renderBoard = (boardState) => {
+            const boardData = boardState.split("\n").map(row => row.trim().split(/\s+/));
+
+            let root = document.querySelector("#root");
+            root.innerHTML = "";
+
+            let blocksWrapper = document.createElement("div");
+            blocksWrapper.classList.add("blocks-wrapper");
+            blocksWrapper.style.gridTemplate = `repeat(${boardData.length}, 1fr) / repeat(${boardData[0].length}, 1fr)`;
+            root.appendChild(blocksWrapper);
+
+            for (let y = 0; y < boardData.length; y++) {
+                for (let x = 0; x < boardData[y].length; x++) {
+                    let block = document.createElement("button");
+                    block.classList.add("block");
+                    block.innerText = boardData[y][x];
+
+                    blocksWrapper.appendChild(block);
+                }
+            }
+        }
+
+        (async function main() {
+            await init();
+
+            renderBoard(getBoardState());
+        })();
+    </script>
+</body>
+
+</html>
