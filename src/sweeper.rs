@@ -53,7 +53,7 @@ impl Display for Sweeper {
                     continue;
                 }
 
-                let mine_count = self.get_neightbors_mines(position);
+                let mine_count = self.get_neightbor_mines(position);
 
                 if mine_count > 0 {
                     write!(f, " {} ", mine_count)?;
@@ -90,7 +90,7 @@ impl Sweeper {
         };
     }
 
-    pub fn get_neighbors_fields_iter(&self, (x, y): Position) -> impl Iterator<Item = Position> {
+    pub fn get_neighbor_fields_iter(&self, (x, y): Position) -> impl Iterator<Item = Position> {
         let width = self.width;
         let height = self.height;
 
@@ -100,17 +100,36 @@ impl Sweeper {
             .filter(move |&position| position != (x, y))
     }
 
-    pub fn get_neightbors_mines(&self, position: Position) -> u8 {
-        self.get_neighbors_fields_iter(position)
+    pub fn get_neightbor_mines(&self, position: Position) -> u8 {
+        self.get_neighbor_fields_iter(position)
             .filter(|pos| self.mines.contains(pos))
             .count() as u8
     }
 
     pub fn open(&mut self, position: Position) -> Option<MineOpeningResult> {
-        if self.is_game_over
-            || self.fields_open.contains(&position)
-            || self.fields_flagged.contains(&position)
-        {
+        if self.fields_open.contains(&position) {
+            let mine_count = self.get_neightbor_mines(position);
+            let flag_count = self
+                .get_neighbor_fields_iter(position)
+                .filter(|field_position| self.fields_flagged.contains(field_position))
+                .count() as u8;
+
+            if mine_count == flag_count {
+                for neighbor_position in self.get_neighbor_fields_iter(position) {
+                    let is_open = self.fields_open.contains(&neighbor_position);
+                    let is_flagged = self.fields_flagged.contains(&neighbor_position);
+                    let is_mine = self.mines.contains(&neighbor_position);
+
+                    if !is_flagged && !is_mine && !is_open {
+                        self.open(neighbor_position);
+                    }
+                }
+            }
+
+            return None;
+        }
+
+        if self.is_game_over || self.fields_flagged.contains(&position) {
             return None;
         }
 
@@ -123,11 +142,15 @@ impl Sweeper {
             return Some(MineOpeningResult::Mine);
         }
 
-        let mine_count = self.get_neightbors_mines(position);
+        let mine_count = self.get_neightbor_mines(position);
 
         if mine_count == 0 {
-            for neightbor in self.get_neighbors_fields_iter(position) {
-                self.open(neightbor);
+            for neightbor in self.get_neighbor_fields_iter(position) {
+                let is_closed = !self.fields_open.contains(&position);
+
+                if is_closed {
+                    self.open(neightbor);
+                }
             }
         }
 
