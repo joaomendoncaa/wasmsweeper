@@ -31,6 +31,12 @@ impl Display for Sweeper {
                 let is_field_closed = !self.fields_open.contains(&position);
                 let is_field_flagged = self.fields_flagged.contains(&position);
                 let is_mine = self.mines.contains(&position);
+                let has_lost = self.is_game_over;
+
+                if is_field_closed && has_lost && is_mine {
+                    f.write_str("mine ")?;
+                    continue;
+                }
 
                 if is_field_closed && is_field_flagged {
                     f.write_str("flag ")?;
@@ -47,7 +53,14 @@ impl Display for Sweeper {
                     continue;
                 }
 
-                write!(f, " {} ", self.get_neightbors_mines(position))?;
+                let mine_count = self.get_neightbors_mines(position);
+
+                if mine_count > 0 {
+                    write!(f, " {} ", mine_count)?;
+                    continue;
+                }
+
+                write!(f, " empty ")?;
             }
 
             f.write_char('\n')?;

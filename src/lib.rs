@@ -7,7 +7,7 @@ use sweeper::Sweeper;
 use wasm_bindgen::prelude::*;
 
 thread_local! {
-    static SWEEPER: RefCell<Sweeper> = RefCell::new(Sweeper::new(10, 10, 5));
+    static SWEEPER: RefCell<Sweeper> = RefCell::new(Sweeper::new(10, 10, 15));
 }
 
 #[wasm_bindgen(js_name = getBoardState)]
