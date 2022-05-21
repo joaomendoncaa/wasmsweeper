@@ -29,17 +29,26 @@ impl Display for Sweeper {
             for x in 0..self.width {
                 let position = (x, y);
 
-                if !self.fields_open.contains(&position) {
-                    if self.fields_flagged.contains(&position) {
-                        f.write_str("🚩 ")?;
-                    } else {
-                        f.write_str("⬛ ")?;
-                    }
-                } else if self.mines.contains(&position) {
-                    f.write_str("💣 ")?;
-                } else {
-                    write!(f, " {} ", self.get_neightbors_mines(position))?;
+                let is_field_closed = !self.fields_open.contains(&position);
+                let is_field_flagged = self.fields_flagged.contains(&position);
+                let is_mine = self.mines.contains(&position);
+
+                if is_field_closed && is_field_flagged {
+                    f.write_str("🚩 ")?;
+                    continue;
                 }
+
+                if is_field_closed {
+                    f.write_str("⬛ ")?;
+                    continue;
+                }
+
+                if is_mine {
+                    f.write_str("💣 ")?;
+                    continue;
+                }
+
+                write!(f, " {} ", self.get_neightbors_mines(position))?;
             }
 
             f.write_char('\n')?;
