@@ -24,10 +24,6 @@
             background-color: grey;
             color: white;
         }
-
-        .block:active {
-            background-color: red;
-        }
     </style>
 </head>
 
@@ -35,7 +31,7 @@
     <div id="root"></div>
 
     <script type="module">
-        import init, { getBoardState } from "./pkg/wasmsweeper.js"
+        import init, { getBoardState, openField } from "./pkg/wasmsweeper.js"
 
         const renderBoard = (boardState) => {
             const boardData = boardState.split("\n").map(row => row.trim().split(/\s+/));
@@ -54,12 +50,22 @@
                     block.classList.add("block");
                     block.innerText = boardData[y][x];
 
+                    block.addEventListener("click", (event) => {
+                        event.preventDefault();
+
+                        openField(x, y);
+
+                        renderBoard(getBoardState());
+                    });
+
                     blocksWrapper.appendChild(block);
                 }
             }
         }
 
         (async function main() {
+            console.log("Hello, Sweeper!");
+
             await init();
 
             renderBoard(getBoardState());
