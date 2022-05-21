@@ -141,6 +141,7 @@ impl Sweeper {
 
         if self.fields_flagged.contains(&position) {
             self.fields_flagged.remove(&position);
+            return;
         }
 
         self.fields_flagged.insert(position);
