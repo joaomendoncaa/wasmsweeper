@@ -12,14 +12,22 @@ pub enum MineOpeningResult {
     NoMine(u8),
 }
 
+#[derive(Debug, Eq, PartialEq)]
+pub enum GameState {
+    Waiting,
+    Playing,
+    Over,
+}
+
 #[derive(Debug)]
 pub struct Sweeper {
     width: usize,
     height: usize,
     fields_open: HashSet<Position>,
     fields_flagged: HashSet<Position>,
-    mines: HashSet<Position>,
-    is_game_over: bool,
+    fields_mines: HashSet<Position>,
+    game_moves_amount: usize,
+    game_state: GameState,
 }
 
 impl Display for Sweeper {
@@ -30,8 +38,8 @@ impl Display for Sweeper {
 
                 let is_field_closed = !self.fields_open.contains(&position);
                 let is_field_flagged = self.fields_flagged.contains(&position);
-                let is_mine = self.mines.contains(&position);
-                let has_lost = self.is_game_over;
+                let is_mine = self.fields_mines.contains(&position);
+                let has_lost = self.game_state == GameState::Over;
 
                 if is_field_closed && has_lost && is_mine {
                     f.write_str("mine ")?;
@@ -77,7 +85,7 @@ impl Sweeper {
             height,
             fields_flagged: HashSet::new(),
             fields_open: HashSet::new(),
-            mines: {
+            fields_mines: {
                 let mut mines = HashSet::new();
 
                 while mines.len() < mine_count {
@@ -86,7 +94,8 @@ impl Sweeper {
 
                 mines
             },
-            is_game_over: false,
+            game_moves_amount: 0,
+            game_state: GameState::Waiting,
         };
     }
 
@@ -102,7 +111,7 @@ impl Sweeper {
 
     pub fn get_neightbor_mines(&self, position: Position) -> u8 {
         self.get_neighbor_fields_iter(position)
-            .filter(|pos| self.mines.contains(pos))
+            .filter(|pos| self.fields_mines.contains(pos))
             .count() as u8
     }
 
@@ -118,7 +127,7 @@ impl Sweeper {
                 for neighbor_position in self.get_neighbor_fields_iter(position) {
                     let is_open = self.fields_open.contains(&neighbor_position);
                     let is_flagged = self.fields_flagged.contains(&neighbor_position);
-                    let is_mine = self.mines.contains(&neighbor_position);
+                    let is_mine = self.fields_mines.contains(&neighbor_position);
 
                     if !is_flagged && !is_mine && !is_open {
                         self.open(neighbor_position);
@@ -129,16 +138,16 @@ impl Sweeper {
             return None;
         }
 
-        if self.is_game_over || self.fields_flagged.contains(&position) {
+        if self.game_state == GameState::Over || self.fields_flagged.contains(&position) {
             return None;
         }
 
         self.fields_open.insert(position);
 
-        let is_mine: bool = self.mines.contains(&position);
+        let is_mine: bool = self.fields_mines.contains(&position);
 
         if is_mine {
-            self.is_game_over = true;
+            self.game_state = GameState::Over;
             return Some(MineOpeningResult::Mine);
         }
 
@@ -158,7 +167,7 @@ impl Sweeper {
     }
 
     pub fn toggle_flag(&mut self, position: Position) {
-        if self.is_game_over || self.fields_open.contains(&position) {
+        if self.game_state == GameState::Over || self.fields_open.contains(&position) {
             return;
         }
 
@@ -168,22 +177,5 @@ impl Sweeper {
         }
 
         self.fields_flagged.insert(position);
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::sweeper::Sweeper;
-
-    #[test]
-    fn sweeper_instance() {
-        let mut sweeper = Sweeper::new(10, 10, 2);
-
-        sweeper.open((0, 0));
-        sweeper.toggle_flag((0, 0));
-        sweeper.toggle_flag((1, 1));
-        sweeper.open((1, 1));
-
-        println!("{}", sweeper);
     }
 }
