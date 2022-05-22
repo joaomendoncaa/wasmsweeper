@@ -1,1 +1,1 @@
-wasm-pack build --target web && rm ./pkg/.gitignore && cp ./index.html ./pkg && serve
+wasm-pack build --target web && rm ./pkg/.gitignore && cp ./index.html ./pkg && python3 -m http.server 3333
