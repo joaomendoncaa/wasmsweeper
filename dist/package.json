@@ -1,0 +1,12 @@
+{
+  "name": "wasmsweeper",
+  "version": "0.1.0",
+  "files": [
+    "wasmsweeper_bg.wasm",
+    "wasmsweeper.js",
+    "wasmsweeper.d.ts"
+  ],
+  "module": "wasmsweeper.js",
+  "types": "wasmsweeper.d.ts",
+  "sideEffects": false
+}
