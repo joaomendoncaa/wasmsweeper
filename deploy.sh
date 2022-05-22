@@ -1,0 +1,1 @@
+wasm-pack build --target web && rm ./pkg/.gitignore && git add . && git commit -m "$1" && git push
